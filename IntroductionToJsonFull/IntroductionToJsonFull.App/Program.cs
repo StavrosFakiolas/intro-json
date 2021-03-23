@@ -36,7 +36,12 @@ namespace IntroductionToJsonFull.App
 
             Account account = JsonConvert.DeserializeObject<Account>(json2);
 
+
             Console.WriteLine(account.Email);
+
+            Account a2 = new Account("a@b.com", false, DateTime.UtcNow, new List<string>{"User"});
+            string j3 = JsonConvert.SerializeObject(a2);
+            Console.WriteLine(j3);
 
         }
 
