@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +36,8 @@ namespace IntroductionToJsonFull.App
             ]
             }";
 
+
+
             Account account = JsonConvert.DeserializeObject<Account>(json2);
 
 
@@ -42,6 +46,26 @@ namespace IntroductionToJsonFull.App
             Account a2 = new Account("a@b.com", false, DateTime.UtcNow, new List<string>{"User"});
             string j3 = JsonConvert.SerializeObject(a2);
             Console.WriteLine(j3);
+
+
+            string jsonDownload;
+            using(var wc = new WebClient())
+            {
+                jsonDownload = wc.DownloadString("http://api.worldbank.org/v2/countries/USA/indicators/NY.GDP.MKTP.CD?per_page=5000&format=json");
+           
+            }
+
+            dynamic j = JArray.Parse(jsonDownload);
+
+            dynamic l = j[1];
+            Console.WriteLine(l.Count);
+            foreach(dynamic row in l)
+            {
+                Console.WriteLine($"{row.date}: {row.countryiso3code}: ${row.value / 1000000000:F3}bn");
+            }
+
+            Console.ReadKey();
+
 
         }
 
