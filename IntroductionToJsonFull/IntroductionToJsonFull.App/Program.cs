@@ -4,8 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace IntroductionToJsonFull.App
 {
@@ -13,8 +16,12 @@ namespace IntroductionToJsonFull.App
     {
         // step one - using the nuget package manager
         // https://docs.microsoft.com/en-us/nuget/quickstart/install-and-use-a-package-in-visual-studio 
+
+        [STAThread] //needed for display
         static void Main(string[] args)
         {
+
+
             Console.WriteLine("Hello World!");
 
             string json = @"{""key1"":""value1"",""key2"":""value2""}";
@@ -43,28 +50,32 @@ namespace IntroductionToJsonFull.App
 
             Console.WriteLine(account.Email);
 
-            Account a2 = new Account("a@b.com", false, DateTime.UtcNow, new List<string>{"User"});
+            Account a2 = new Account("a@b.com", false, DateTime.UtcNow, new List<string> { "User" });
             string j3 = JsonConvert.SerializeObject(a2);
             Console.WriteLine(j3);
 
 
             string jsonDownload;
-            using(var wc = new WebClient())
+            using (var wc = new WebClient())
             {
-                jsonDownload = wc.DownloadString("http://api.worldbank.org/v2/countries/USA/indicators/NY.GDP.MKTP.CD?per_page=5000&format=json");
-           
+                jsonDownload = wc.DownloadString("http://api.worldbank.org/v2/countries/IND/indicators/SP.POP.TOTL?per_page=5000&format=json");
+
             }
 
-            dynamic j = JArray.Parse(jsonDownload);
+            JArray j = JArray.Parse(jsonDownload);
 
-            dynamic l = j[1];
-            Console.WriteLine(l.Count);
+            var data = new SortedDictionary<int, int>(); //efficient
+
+            var l = j[1].Skip(1);
             foreach(dynamic row in l)
             {
-                Console.WriteLine($"{row.date}: {row.countryiso3code}: ${row.value / 1000000000:F3}bn");
+                Console.WriteLine($"{row.date}: {row.countryiso3code}: {row.value / 1_000_000:D}mil");
+                data[(int)row.date] = (int)row.value / 1_000_000;
             }
 
             Console.ReadKey();
+
+            Application.Run(new Display(data));
 
 
         }
